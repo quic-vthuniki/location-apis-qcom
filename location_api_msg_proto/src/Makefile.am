@@ -19,10 +19,10 @@ requiredlibs = \
 if PROTOBUF_INC_LIBS
 requiredlibs += \
     -labsl_strings \
-    -labsl_string_view \
     -labsl_log_internal_message \
     -labsl_log_internal_proto \
-    -labsl_log_internal_check_op
+    -labsl_log_internal_check_op \
+    -labsl_log_internal_nullguard
 endif
 
 liblocation_api_msg_proto_la_SOURCES = \

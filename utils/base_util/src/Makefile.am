@@ -1,7 +1,5 @@
 AM_CFLAGS = \
-     -I../ \
-     -I../../base_util \
-     -I../../ \
+     -I$(top_srcdir)/.. \
      -D__func__=__PRETTY_FUNCTION__ \
      -fno-short-enums
 
