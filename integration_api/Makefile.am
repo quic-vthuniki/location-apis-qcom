@@ -1,7 +1,7 @@
 AM_CFLAGS = \
     -DDEBUG \
-    -I src/ \
-    -I inc/ \
+    -I$(top_srcdir)/src/ \
+    -I$(top_srcdir)/inc/ \
     $(GPSUTILS_CFLAGS) \
     $(LOCAPIMSGPROTO_CFLAGS) \
     -std=c++17
@@ -16,13 +16,11 @@ requiredlibs = \
 
 h_sources = \
     src/LocationIntegrationApiImpl.h \
-    inc/LocationIntegrationApi.h \
-    src/LocationIntegrationApiDiagLog.h
+    inc/LocationIntegrationApi.h
 
 c_sources = \
     src/LocationIntegrationApiImpl.cpp \
-    src/LocationIntegrationApi.cpp \
-    src/LocationIntegrationApiDiagLog.cpp
+    src/LocationIntegrationApi.cpp
 
 liblocation_integration_api_la_SOURCES = \
     $(c_sources) $(h_sources)

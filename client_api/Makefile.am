@@ -1,7 +1,7 @@
 AM_CFLAGS = \
     -DDEBUG \
-    -I src/ \
-    -I inc/ \
+    -I$(top_srcdir)/src/ \
+    -I$(top_srcdir)/inc/ \
     $(GPSUTILS_CFLAGS) \
     $(LOCAPIMSGPROTO_CFLAGS) \
     -std=c++17

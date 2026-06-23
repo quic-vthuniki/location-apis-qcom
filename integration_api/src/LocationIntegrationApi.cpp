@@ -38,7 +38,6 @@
 #include <LocationDataTypes.h>
 #include <LocationIntegrationApi.h>
 #include <LocationIntegrationApiImpl.h>
-#include <LocationIntegrationApiDiagLog.h>
 #include <log_util.h>
 #include <loc_pla.h>
 namespace location_integration {
@@ -1066,8 +1065,6 @@ bool LocationIntegrationApi::injectMapMatchedData(const mapMatchedFeedbackData& 
             mmfData.validityMask |= LDT_MMF_DATA_VALID_BEARING_ACC;
             mmfData.bearingAccuracy = mapData.bearingAccuracy;
         }
-        LocationIntegrationApiDiagLog  mLogger;
-        mLogger.diagLogMmfData(mapData);
 
         return (mApiImpl->gnssInjectMmfData(mmfData) == 0);
     } else {
