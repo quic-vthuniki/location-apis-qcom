@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: location-apis
+Description: QTI GPS Location APIs
+Version: @LT_VERSION@
+Libs: -L${libdir} -llocation_api_msg_proto -lloc_api_v02 -lloc_socket -llocation_client_api -llocation_integration_api -llocation_qapi
+Cflags: -I${includedir}

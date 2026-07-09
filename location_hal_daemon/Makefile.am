@@ -1,9 +1,8 @@
 AM_CFLAGS = \
     -DDEBUG \
-    -I./ \
-    $(LOCCORE_CFLAGS) \
+    -I $(srcdir) \
+    -I $(top_srcdir)/location_api_msg_proto/src \
     $(GPSUTILS_CFLAGS) \
-    $(LOCAPIMSGPROTO_CFLAGS) \
      -std=c++17
 
 if USE_SYSTEMD
@@ -17,9 +16,8 @@ AM_CFLAGS += -DFEATURE_AUTOMOTIVE
 endif
 
 requiredlibs = \
-    $(LOCATIONAPI_LIBS) \
     $(GPSUTILS_LIBS) \
-    $(LOCAPIMSGPROTO_LIBS) \
+    ../location_api_msg_proto/src/liblocation_api_msg_proto.la \
     -lprotobuf-lite
 
 h_sources = \
@@ -51,11 +49,3 @@ endif
 location_hal_daemon_LDADD = $(requiredlibs) -ldl
 
 bin_PROGRAMS = location_hal_daemon
-
-library_include_HEADERS = $(h_sources)
-library_includedir = $(pkgincludedir)
-
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = location-hal-daemon.pc
-EXTRA_DIST = $(pkgconfig_DATA)
-

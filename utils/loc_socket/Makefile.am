@@ -1,7 +1,7 @@
 AM_CFLAGS = \
     -DDEBUG \
-    -I src/ \
-    -I inc/ \
+    -I $(srcdir)/src/ \
+    -I $(srcdir)/inc/ \
     $(QMIFW_CFLAGS) \
     $(GPSUTILS_CFLAGS) \
     -fpermissive
@@ -40,11 +40,4 @@ endif
 libloc_socket_la_LIBADD = $(requiredlibs) -lstdc++
 
 #Create and Install libraries
-library_include_HEADERS =
 lib_LTLIBRARIES = libloc_socket.la
-
-library_includedir = $(pkgincludedir)
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = loc-socket.pc
-EXTRA_DIST = $(pkgconfig_DATA)
-

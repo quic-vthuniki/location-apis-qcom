@@ -1,11 +1,11 @@
-# configure.ac -- Autoconf script for gps location-hal-daemon
+# configure.ac -- Autoconf script for gps location-apis
 #
 # Process this file with autoconf to produce a configure script
 
 # Requires autoconf tool later than 2.61
 AC_PREREQ(2.61)
-# Initialize the location-hal-daemon package version 1.0.0
-AC_INIT([location-hal-daemon],1.0.0)
+# Initialize the gps location-apis package version 1.0.0
+AC_INIT([location-apis],1.0.0)
 # Does not strictly follow GNU Coding standards
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 # Disables auto rebuilding of configure, Makefile.ins
@@ -28,26 +28,62 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 PKG_PROG_PKG_CONFIG
 
+m4_define([LT_MAJOR], [1])
+m4_define([LT_MINOR], [0])
+m4_define([LT_PATCH], [0])
+
+AC_SUBST([LT_VERSION], LT_MAJOR.LT_MINOR.LT_PATCH)
+AC_SUBST([LT_VERSION_NUMBER], LT_MAJOR:LT_MINOR:LT_PATCH)
+
 # Checks for libraries.
-PKG_CHECK_MODULES([LOCCORE], [loc-core])
-AC_SUBST([LOCCORE_CFLAGS])
-AC_SUBST([LOCCORE_LIBS])
-
-PKG_CHECK_MODULES([LOCATIONAPI], [location-api])
-AC_SUBST([LOCATIONAPI_CFLAGS])
-AC_SUBST([LOCATIONAPI_LIBS])
-
-PKG_CHECK_MODULES([LOCHAL], [loc-hal])
-AC_SUBST([LOCHAL_CFLAGS])
-AC_SUBST([LOCHAL_LIBS])
-
-PKG_CHECK_MODULES([GPSUTILS], [qcom-gps-utils])
+PKG_CHECK_MODULES([GPSUTILS], [location-hal])
 AC_SUBST([GPSUTILS_CFLAGS])
 AC_SUBST([GPSUTILS_LIBS])
 
-PKG_CHECK_MODULES([LOCAPIMSGPROTO], [location-api-msg-proto])
-AC_SUBST([LOCAPIMSGPROTO_CFLAGS])
-AC_SUBST([LOCAPIMSGPROTO_LIBS])
+PKG_CHECK_MODULES([QMIFW], [qmi-framework])
+AC_SUBST([QMIFW_CFLAGS])
+AC_SUBST([QMIFW_LIBS])
+
+PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 25.3],
+        [protobuf_update=yes], [protobuf_update=no])
+
+AC_MSG_NOTICE([Have updated protobuf version - ${protobuf_update}])
+AM_CONDITIONAL([PROTOBUF_INC_LIBS], [test "${protobuf_update}" = "yes"])
+
+AC_CHECK_FUNCS([strlcpy strlcat])
+
+if test "x$ac_cv_func_strlcpy" = "xno"; then
+    AC_DEFINE([USE_G_STRLCPY], [1], [use G LIB Strcpy])
+    AM_CONDITIONAL([USE_G_STRLCPY], [true])
+else
+    AC_DEFINE([USE_G_STRLCPY], [0], [Do not use G LIB Strcpy])
+    AM_CONDITIONAL([USE_G_STRLCPY], [false])
+fi
+
+if test "x$ac_cv_func_strlcat" = "xno"; then
+    AC_DEFINE([USE_G_STRLCAT], [1], [use G LIB Strcat])
+    AM_CONDITIONAL([USE_G_STRLCAT], [true])
+else
+    AC_DEFINE([USE_G_STRLCAT], [0], [Do not use G LIB Strcat])
+    AM_CONDITIONAL([USE_G_STRLCAT], [false])
+fi
+
+AC_ARG_WITH([external_ap],
+    AC_HELP_STRING([--with-external_ap=@<:@dir@:>@],
+        [Using External Application Processor]),
+    [],
+    with_external_ap=no)
+
+if test "x$with_external_ap" != "xno"; then
+    CPPFLAGS="${CPPFLAGS} -DFEATURE_EXTERNAL_AP"
+fi
+
+AM_CONDITIONAL(USE_EXTERNAL_AP, test "x${with_external_ap}" = "xyes")
+
+AC_ARG_WITH([qsocket],
+       AC_HELP_STRING([--with-qsocket], [kernel supports qsocket]))
+
+AM_CONDITIONAL(USE_QSOCKET, test "x${with_qsocket}" = "xyes")
 
 AC_ARG_WITH([systemd],
       AC_HELP_STRING([--with-systemd],
@@ -100,7 +136,15 @@ AM_CONDITIONAL(USE_GLIB, test "x${with_glib}" = "xyes")
 
 AC_CONFIG_FILES([ \
         Makefile \
-        location-hal-daemon.pc
+        location_api_msg_proto/Makefile \
+        location_api_msg_proto/src/Makefile \
+        loc_api/loc_api_v02/Makefile \
+        utils/loc_socket/Makefile \
+        client_api/Makefile \
+        integration_api/Makefile \
+        location_hal_daemon/Makefile \
+        qapi/Makefile \
+        location-apis.pc \
         ])
 
 AC_OUTPUT

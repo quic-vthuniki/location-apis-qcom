@@ -1,5 +1,5 @@
 AM_CFLAGS = \
-     -I./ \
+     -I$(srcdir) \
      -D__STDC_FORMAT_MACROS \
      $(GPSUTILS_CFLAGS) \
      -std=c++17
@@ -25,17 +25,20 @@ requiredlibs += \
     -labsl_log_internal_nullguard
 endif
 
+h_sources = \
+    LocationApiMsg.h \
+    LocationApiDataTypes.pb.h \
+    LocationApiMsg.pb.h \
+    LocationApiPbMsgConv.h
+
+library_includedir = $(includedir)
+library_include_HEADERS = $(h_sources)
+
 liblocation_api_msg_proto_la_SOURCES = \
     LocationApiDataTypes.pb.cc \
     LocationApiMsg.pb.cc \
     LocationApiMsg.cpp \
     LocationApiPbMsgConv.cpp
-
-library_include_HEADERS = \
-    LocationApiMsg.h \
-    LocationApiDataTypes.pb.h \
-    LocationApiMsg.pb.h \
-    LocationApiPbMsgConv.h
 
 if USE_GLIB
 liblocation_api_msg_proto_la_CFLAGS = -DUSE_GLIB $(AM_CFLAGS) @GLIB_CFLAGS@ -include glib.h
@@ -49,6 +52,5 @@ endif
 
 liblocation_api_msg_proto_la_LIBADD = $(requiredlibs) -ldl -lstdc++
 
-library_includedir = $(pkgincludedir)
 #Create and Install libraries
 lib_LTLIBRARIES = liblocation_api_msg_proto.la

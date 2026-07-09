@@ -1,9 +1,9 @@
 AM_CFLAGS = \
     -DDEBUG \
-    -I src/ \
-    -I inc/ \
+    -I $(srcdir)/src/ \
+    -I $(srcdir)/inc/ \
+    -I $(top_srcdir)/client_api/inc \
     $(GPSUTILS_CFLAGS) \
-    $(LOCCLIENTAPI_CFLAGS) \
     -std=c++17
 
 ACLOCAL_AMFLAGS = -I m4
@@ -11,13 +11,16 @@ AM_CPPFLAGS = -std=c++17
 
 requiredlibs = \
     $(GPSUTILS_LIBS) \
-    $(LOCCLIENTAPI_LIBS)
+    ../client_api/liblocation_client_api.la
 
 h_sources = \
     inc/qapi_location.h
 
 c_sources = \
     src/qapi_location.cpp
+
+library_includedir = $(includedir)
+library_include_HEADERS = $(h_sources)
 
 liblocation_qapi_la_SOURCES = \
     $(c_sources) $(h_sources)
@@ -39,10 +42,4 @@ endif
 liblocation_qapi_la_LIBADD = $(requiredlibs) -lstdc++
 
 #Create and Install libraries
-library_include_HEADERS = $(h_sources)
 lib_LTLIBRARIES = liblocation_qapi.la
-
-library_includedir = $(pkgincludedir)
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = location-qapi.pc
-EXTRA_DIST = $(pkgconfig_DATA)
