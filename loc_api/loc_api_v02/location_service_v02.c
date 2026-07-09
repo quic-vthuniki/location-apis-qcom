@@ -39,9 +39,9 @@
    From IDL File: location_service_v02.idl */
 
 #include "stdint.h"
-#include "qmi_idl_lib_internal.h"
+#include "qmi_framework/qmi_idl_lib_internal.h"
 #include "location_service_v02.h"
-#include "common_v01.h"
+#include "qmi_framework/common_v01.h"
 
 
 /*Type Definitions*/

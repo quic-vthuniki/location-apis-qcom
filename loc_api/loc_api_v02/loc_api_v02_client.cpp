@@ -39,9 +39,9 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#include "qmi_client.h"
-#include "qmi_idl_lib.h"
-#include "qmi_cci_target_ext.h"
+#include "qmi_framework/qmi_cci.h"
+#include "qmi_framework/qmi_idl_lib.h"
+#include "qmi_framework/qmi_cci_target_ext.h"
 
 #if defined( _ANDROID_)
 #include "qmi_cci_target.h"
@@ -973,7 +973,7 @@ static locClientStatusEnumType convertQmiResponseToLocStatus(
 */
 
 static locClientErrorEnumType convertQmiErrorToLocError(
-  qmi_client_error_type error)
+  qmi_cci_error_type error)
 {
   locClientErrorEnumType locError;
   switch(error)
@@ -1001,7 +1001,7 @@ static locClientErrorEnumType convertQmiErrorToLocError(
 static void locClientErrorCb
 (
   qmi_client_type user_handle,
-  qmi_client_error_type error,
+  qmi_cci_error_type error,
   void *err_cb_data
 )
 {
@@ -1066,7 +1066,7 @@ static void locClientIndCb
 {
   locClientIndEnumT indType;
   size_t indSize = 0;
-  qmi_client_error_type rc ;
+  qmi_cci_error_type rc ;
 
   locClientCallbackDataType* pCallbackData =
       (locClientCallbackDataType *)ind_cb_data;
@@ -1105,7 +1105,7 @@ static void locClientIndCb
     if (ind_buf_len > 0)
     {
         // decode the indication
-        rc = qmi_client_message_decode(
+        rc = qmi_cci_message_decode(
             user_handle,
             QMI_IDL_INDICATION,
             msg_id,
@@ -1969,7 +1969,7 @@ static locClientStatusEnumType locClientQmiCtrlPointInit(
 
   do
   {
-    qmi_client_error_type rc = QMI_NO_ERR;
+    qmi_cci_error_type rc = QMI_NO_ERR;
 
     // Get the service object for the qmiLoc Service
     qmi_idl_service_object_type locClientServiceObject =
@@ -1984,11 +1984,11 @@ static locClientStatusEnumType locClientQmiCtrlPointInit(
     }
 
     // register for service notification
-    rc = qmi_client_notifier_init(locClientServiceObject, &os_params, &notifier);
+    rc = qmi_cci_notifier_init(locClientServiceObject, &os_params, &notifier);
     notifierInitFlag = (NULL != notifier);
 
     if (rc != QMI_NO_ERR) {
-        LOC_LOGe("qmi_client_notifier_init failed rc = %d", rc);
+        LOC_LOGe("qmi_cci_notifier_init failed rc = %d", rc);
         status = eLOC_CLIENT_FAILURE_INTERNAL;
         break;
     }
@@ -1998,16 +1998,16 @@ static locClientStatusEnumType locClientQmiCtrlPointInit(
 
         if (instanceId >= 0) {
             // use instance-specific lookup
-            rc = qmi_client_get_service_instance(locClientServiceObject, instanceId, &serviceInfo);
+            rc = qmi_cci_get_service_instance(locClientServiceObject, instanceId, &serviceInfo);
         } else {
             // lookup service with any instance id
-            rc = qmi_client_get_any_service(locClientServiceObject, &serviceInfo);
+            rc = qmi_cci_get_service_instance(locClientServiceObject, QMI_CLIENT_INSTANCE_ANY, &serviceInfo);
         }
 
         if (rc == QMI_NO_ERR) {
             break;
         } else {
-            LOC_LOGe(" qmi_client_get_service() rc: %d ", rc);
+            LOC_LOGe(" qmi_cci_get_service() rc: %d ", rc);
         }
 
         QMI_CCI_OS_SIGNAL_WAIT(&os_params, 0);
@@ -2018,31 +2018,31 @@ static locClientStatusEnumType locClientQmiCtrlPointInit(
     // if IPC router is present, this will go to the service instance
     // enumerated over IPC router, else it will go over the next transport where
     // the service was enumerated.
-    rc = qmi_client_init(&serviceInfo, locClientServiceObject,
+    rc = qmi_cci_init(&serviceInfo, locClientServiceObject,
                          locClientIndCb, (void *) pLocClientCbData,
                          NULL, &clnt);
 
     if(rc != QMI_NO_ERR)
     {
-      LOC_LOGe("qmi_client_init error %d", rc);
+      LOC_LOGe("qmi_cci_init error %d", rc);
 
       status = eLOC_CLIENT_FAILURE_INTERNAL;
       break;
     }
 
     // register error callback
-    rc  = qmi_client_register_error_cb(clnt,
+    rc  = qmi_cci_register_error_cb(clnt,
         locClientErrorCb, (void *) pLocClientCbData);
 
     if( QMI_NO_ERR != rc)
     {
-      LOC_LOGe("qmi_client_register_error_cb error:%d", rc);
+      LOC_LOGe("qmi_cci_register_error_cb error:%d", rc);
 
       status = eLOC_CLIENT_FAILURE_INTERNAL;
       break;
     }
 
-    // copy the clnt handle returned in qmi_client_init
+    // copy the clnt handle returned in qmi_cci_init
     memcpy(&(pLocClientCbData->userHandle), &clnt, sizeof(qmi_client_type));
 
     status = eLOC_CLIENT_SUCCESS;
@@ -2052,7 +2052,7 @@ static locClientStatusEnumType locClientQmiCtrlPointInit(
   /* release the notifier handle */
   if(true == notifierInitFlag)
   {
-    qmi_client_release(notifier);
+    qmi_cci_release(notifier);
   }
 
   return status;
@@ -2265,7 +2265,7 @@ locClientStatusEnumType locClientClose(
 {
   // convert handle to callback data
   locClientCallbackDataType *pCallbackData;
-  qmi_client_error_type rc = QMI_NO_ERR; //No error
+  qmi_cci_error_type rc = QMI_NO_ERR; //No error
 
   if(NULL == pLocClientHandle)
   {
@@ -2298,10 +2298,10 @@ locClientStatusEnumType locClientClose(
   EXIT_LOG_CALLFLOW(%s, "loc client close");
 
   // release the handle
-  rc = qmi_client_release(pCallbackData->userHandle);
+  rc = qmi_cci_release(pCallbackData->userHandle);
   if(QMI_NO_ERR != rc )
   {
-    LOC_LOGw("qmi_client_release error %d for client %p",
+    LOC_LOGw("qmi_cci_release error %d for client %p",
              rc, pCallbackData->userHandle);
     return(eLOC_CLIENT_FAILURE_INTERNAL);
   }
@@ -2349,7 +2349,7 @@ locClientStatusEnumType locClientSendReq(
   locClientReqUnionType    reqPayload )
 {
   locClientStatusEnumType status = eLOC_CLIENT_SUCCESS;
-  qmi_client_error_type rc = QMI_NO_ERR; //No error
+  qmi_cci_error_type rc = QMI_NO_ERR; //No error
   qmiLocGenRespMsgT_v02 resp;
   uint32_t reqLen = 0;
   void *pReqData = NULL;
@@ -2382,7 +2382,7 @@ locClientStatusEnumType locClientSendReq(
     // that the QMI framework is robust.
     EXIT_LOG_CALLFLOW(%s, loc_get_v02_event_name(reqId));
     memset(&resp, 0, sizeof(resp));
-    rc = qmi_client_send_msg_sync(
+    rc = qmi_cci_send_msg_sync(
            pCallbackData->userHandle,
            reqId,
            pReqData,
@@ -2482,7 +2482,7 @@ locClientStatusEnumType locClientSupportMsgCheck(
   }
 
   locClientStatusEnumType status = eLOC_CLIENT_SUCCESS;
-  qmi_client_error_type rc = QMI_NO_ERR; //No error
+  qmi_cci_error_type rc = QMI_NO_ERR; //No error
   qmiLocGetSupportMsgT_v02 resp;
 
   uint32_t reqLen = 0;
@@ -2506,7 +2506,7 @@ locClientStatusEnumType locClientSupportMsgCheck(
   // that the QMI framework is robust.
 
   EXIT_LOG_CALLFLOW(%s, loc_get_v02_event_name(QMI_LOC_GET_SUPPORTED_MSGS_REQ_V02));
-  rc = qmi_client_send_msg_sync(
+  rc = qmi_cci_send_msg_sync(
       pCallbackData->userHandle,
       QMI_LOC_GET_SUPPORTED_MSGS_REQ_V02,
       pReqData,
