@@ -1,12 +1,22 @@
 AM_CFLAGS = \
-    -I. \
+    -I$(srcdir) \
     $(LOCPLA_CFLAGS) \
     $(GPSUTILS_CFLAGS) \
-    $(LOCCORE_CFLAGS) \
     $(QMIFW_CFLAGS) \
     -fno-short-enums \
     -D__func__=__PRETTY_FUNCTION__ \
     -DTARGET_USES_QCOM_BSP
+
+h_sources = \
+    location_service_v02.h \
+    loc_api_v02_log.h \
+    loc_api_v02_client.h \
+    loc_api_sync_req.h \
+    LocApiV02.h \
+    loc_util_log.h
+
+library_includedir = $(includedir)
+library_include_HEADERS = $(h_sources)
 
 libloc_api_v02_la_SOURCES = \
     LocApiV02.cpp \
@@ -26,22 +36,7 @@ libloc_api_v02_la_CPPFLAGS = $(AM_CFLAGS) $(AM_CPPFLAGS)
 endif
 
 libloc_api_v02_la_CXXFLAGS = -std=c++0x
-libloc_api_v02_la_LIBADD = -lstdc++ -ldl $(QMIFW_LIBS) $(GPSUTILS_LIBS) $(LOCCORE_LIBS)
-
-library_include_HEADERS = \
-    location_service_v02.h \
-    loc_api_v02_log.h \
-    loc_api_v02_client.h \
-    loc_api_sync_req.h \
-    LocApiV02.h \
-    loc_util_log.h
-
-library_includedir = $(pkgincludedir)/loc_api_v02
+libloc_api_v02_la_LIBADD = -lstdc++ -ldl $(QMIFW_LIBS) $(GPSUTILS_LIBS)
 
 #Create and Install libraries
 lib_LTLIBRARIES = libloc_api_v02.la
-
-library_includedir = $(pkgincludedir)
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = loc-api-v02.pc
-EXTRA_DIST = $(pkgconfig_DATA)

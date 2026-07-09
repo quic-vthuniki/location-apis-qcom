@@ -1,9 +1,10 @@
 AM_CFLAGS = \
     -DDEBUG \
-    -I$(top_srcdir)/src/ \
-    -I$(top_srcdir)/inc/ \
+    -I $(srcdir)/src/ \
+    -I $(srcdir)/inc/ \
+    -I $(top_srcdir)/location_api_msg_proto/src \
+    -I $(top_srcdir)/client_api/inc \
     $(GPSUTILS_CFLAGS) \
-    $(LOCAPIMSGPROTO_CFLAGS) \
     -std=c++17
 
 ACLOCAL_AMFLAGS = -I m4
@@ -11,16 +12,18 @@ AM_CPPFLAGS = -std=c++17
 
 requiredlibs = \
     $(GPSUTILS_LIBS) \
-    $(LOCAPIMSGPROTO_LIBS) \
+    ../location_api_msg_proto/src/liblocation_api_msg_proto.la \
     -lprotobuf-lite
 
 h_sources = \
     src/LocationIntegrationApiImpl.h \
     inc/LocationIntegrationApi.h
-
 c_sources = \
     src/LocationIntegrationApiImpl.cpp \
     src/LocationIntegrationApi.cpp
+
+library_includedir = $(includedir)
+library_include_HEADERS = inc/LocationIntegrationApi.h
 
 liblocation_integration_api_la_SOURCES = \
     $(c_sources) $(h_sources)
@@ -31,8 +34,7 @@ liblocation_integration_api_la_h_sources = $(h_sources)
 ######################
 
 if USE_EXTERNAL_AP
-AM_CFLAGS += $(LOCSOCKET_CFLAGS) -DFEATURE_EXTERNAL_AP
-requiredlibs += $(LOCSOCKET_LIBS)
+AM_CFLAGS += -DFEATURE_EXTERNAL_AP
 endif
 
 if USE_GLIB
@@ -48,10 +50,4 @@ endif
 liblocation_integration_api_la_LIBADD = $(requiredlibs) -lstdc++ -ldl
 
 #Create and Install libraries
-library_include_HEADERS = $(h_sources)
 lib_LTLIBRARIES = liblocation_integration_api.la
-
-library_includedir = $(pkgincludedir)
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = location-integration-api.pc
-EXTRA_DIST = $(pkgconfig_DATA)
