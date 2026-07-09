@@ -80,8 +80,8 @@
 /** @defgroup loc_qmi_version Constant values for versioning information */
 
 #include <stdint.h>
-#include "qmi_idl_lib.h"
-#include "common_v01.h"
+#include "qmi_framework/qmi_idl_lib.h"
+#include "qmi_framework/common_v01.h"
 
 
 #ifdef __cplusplus
