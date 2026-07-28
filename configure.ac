@@ -40,7 +40,18 @@ PKG_CHECK_MODULES([GPSUTILS], [location-hal])
 AC_SUBST([GPSUTILS_CFLAGS])
 AC_SUBST([GPSUTILS_LIBS])
 
-PKG_CHECK_MODULES([QMIFW], [qmi-framework])
+AC_ARG_WITH([qmi],
+    AC_HELP_STRING([--with-qmi=DIR],
+                   [Specify the location of the qmi-framework headers, bypassing pkg-config]),
+    [qmidir=$withval],
+    [qmidir=""])
+
+if test "x$qmidir" != "x"; then
+    QMIFW_CFLAGS="-I${qmidir}"
+    QMIFW_LIBS="-lqcci -lqcsi -lqencdec -lqmi_common"
+else
+    PKG_CHECK_MODULES([QMIFW], [qmi-framework])
+fi
 AC_SUBST([QMIFW_CFLAGS])
 AC_SUBST([QMIFW_LIBS])
 
