@@ -50,3 +50,10 @@ endif
 location_hal_daemon_LDADD = $(requiredlibs) -ldl
 
 bin_PROGRAMS = location_hal_daemon
+
+if USE_SYSTEMD
+systemdsystemunit_DATA = location_hal_daemon.service
+tmpfiles_DATA = location_hal_daemon-tmpfilesd.conf
+endif
+
+EXTRA_DIST = location_hal_daemon.service location_hal_daemon-tmpfilesd.conf

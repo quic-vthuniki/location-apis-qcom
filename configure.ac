@@ -107,6 +107,20 @@ AC_ARG_WITH([systemd],
 
 AM_CONDITIONAL(USE_SYSTEMD, test "x${with_systemd}" = "xyes")
 
+if test "x${with_systemd}" = "xyes"; then
+     AC_ARG_WITH([systemdsystemunitdir],
+         AC_HELP_STRING([--with-systemdsystemunitdir=DIR],
+            [Directory for systemd service files]),
+         [], [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
+     AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
+
+     AC_ARG_WITH([tmpfilesdir],
+         AC_HELP_STRING([--with-tmpfilesdir=DIR],
+            [Directory for tmpfiles.d configuration files]),
+         [], [with_tmpfilesdir=$($PKG_CONFIG --variable=tmpfilesdir systemd)])
+     AC_SUBST([tmpfilesdir], [$with_tmpfilesdir])
+fi
+
 AC_ARG_WITH([auto_feature],
     AC_HELP_STRING([--with-auto_feature=@<:@dir@:>@],
         [Using Automotive feature]),
