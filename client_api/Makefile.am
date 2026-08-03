@@ -3,6 +3,7 @@ AM_CFLAGS = \
     -I $(srcdir)/src/ \
     -I $(srcdir)/inc/ \
     -I $(top_srcdir)/location_api_msg_proto/src \
+    -I $(top_builddir)/location_api_msg_proto/src \
     $(GPSUTILS_CFLAGS) \
     -std=c++17
 

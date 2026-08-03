@@ -1,4 +1,5 @@
 AM_CFLAGS = \
+     -I. \
      -I$(srcdir) \
      -D__STDC_FORMAT_MACROS \
      $(GPSUTILS_CFLAGS) \
@@ -24,6 +25,18 @@ requiredlibs += \
     -labsl_log_internal_check_op \
     -labsl_log_internal_nullguard
 endif
+
+PROTO_SRCDIR = $(srcdir)/..
+
+BUILT_SOURCES = \
+      LocationApiDataTypes.pb.cc LocationApiDataTypes.pb.h \
+      LocationApiMsg.pb.cc LocationApiMsg.pb.h
+
+%.pb.cc %.pb.h: $(PROTO_SRCDIR)/%.proto
+	$(PROTOC) --proto_path=$(PROTO_SRCDIR) --cpp_out=. $<
+
+CLEANFILES = $(BUILT_SOURCES)
+
 
 h_sources = \
     LocationApiMsg.h \

@@ -2,6 +2,7 @@ AM_CFLAGS = \
     -DDEBUG \
     -I $(srcdir) \
     -I $(top_srcdir)/location_api_msg_proto/src \
+    -I $(top_builddir)/location_api_msg_proto/src \
     $(GPSUTILS_CFLAGS) \
      -std=c++17
 

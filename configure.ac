@@ -36,6 +36,11 @@ AC_SUBST([LT_VERSION], LT_MAJOR.LT_MINOR.LT_PATCH)
 AC_SUBST([LT_VERSION_NUMBER], LT_MAJOR:LT_MINOR:LT_PATCH)
 
 # Checks for libraries.
+AC_PATH_PROG([PROTOC], [protoc])
+if test "x$PROTOC" = "x"; then
+      AC_MSG_ERROR([protoc compiler not found])
+fi
+
 PKG_CHECK_MODULES([GPSUTILS], [location-hal])
 AC_SUBST([GPSUTILS_CFLAGS])
 AC_SUBST([GPSUTILS_LIBS])
