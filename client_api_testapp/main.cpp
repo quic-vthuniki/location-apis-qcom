@@ -596,7 +596,7 @@ static void onGnssEphemerisCb(const location_client::GnssEphemeris& ephInfo) {
 
 static void printHelp() {
     printf("\n************* options *************\n");
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
     printf("e reprottype tbf: Concurrent engine report session with 100 ms interval\n");
     printf("u: Update a session with 2000 ms interval\n");
     printf("m: Interleaving fix session with 1000 and 2000 ms interval, change every 3 seconds\n");
@@ -610,7 +610,7 @@ static void printHelp() {
     printf("%s: supress output from various reports\n", DISABLE_REPORT_OUTPUT);
     printf("%s: enable output from various reports\n", ENABLE_REPORT_OUTPUT);
     printf("%s: enable detailed output from various reports\n", ENABLE_DETAILED_REPORT_OUTPUT);
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
     printf("%s tuncThreshold energyBudget: enable tunc\n", ENABLE_TUNC);
     printf("%s: disable tunc\n", DISABLE_TUNC);
     printf("%s: enable PACE\n", ENABLE_PACE);
@@ -636,7 +636,7 @@ static void printHelp() {
     printf("%s: get single terrestrial fix, timeout_msec 0.0 1\n", GET_SINGLE_TERRESTRIAL_FIX);
     printf("%s: get multiple terrestrial fix: numOfFixes tbfMsec timeout_msec 0.0 1\n",
            GET_MULTIPLE_TERRESTRIAL_FIXES);
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
     printf("%s: config nmea types \n", CONFIG_NMEA_TYPES);
     printf("%s: config engine integrity risk \n", CONFIG_ENGINE_INTEGRITY_RISK);
     printf("%s: get gnss energy consumed \n", GET_ENERGY_CONSUMED);
@@ -650,7 +650,7 @@ static void printHelp() {
     printf("%s: register xtra status update \n", REGISTER_XTRA_STATUS_UPDATE);
     printf("%s: enable xtra on demand download \n", ENABLE_XTRA_ON_DEMAND_DOWNLOAD);
 
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
     printf("%s: config merkle tree \n", CONFIG_MERKLE_TREE);
     printf("%s: config osnam enablement \n", CONFIG_OSNMA_ENABLEMENT);
     printf("%s: register GNSS signal types update \n", REGISTER_SIGNAL_TYPES_UPDATE);
@@ -2096,7 +2096,7 @@ int main(int argc, char *argv[]) {
                            strlen(ENABLE_DETAILED_REPORT_OUTPUT)) == 0) {
             outputEnabled = true;
             detailedOutputEnabled = true;
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
         } else if (strncmp(buf, DISABLE_REPORT_OUTPUT, strlen(DISABLE_REPORT_OUTPUT)) == 0) {
             outputEnabled = false;
         } else if (strncmp(buf, DISABLE_TUNC, strlen(DISABLE_TUNC)) == 0) {
@@ -2303,7 +2303,7 @@ int main(int argc, char *argv[]) {
                 pLcaClient->getSingleTerrestrialPosition(
                         0, TERRESTRIAL_TECH_GTP_WWAN, 0.0, nullptr, onGtpResponseCb);
             }
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
         } else if (strncmp(buf, GET_ENERGY_CONSUMED,
                            strlen(GET_ENERGY_CONSUMED)) == 0) {
             if (!pLcaClient) {
@@ -2422,7 +2422,7 @@ int main(int argc, char *argv[]) {
             }
             printf("register update %d\n", registerUpdate);
             pIntClient->registerXtraStatusUpdate(registerUpdate);
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
         } else if (strncmp(buf, CONFIG_MERKLE_TREE, strlen(CONFIG_MERKLE_TREE)) == 0) {
             FILE *xmlFile = fopen("/etc/merkletree.xml", "rb");
             if (nullptr == xmlFile) {
@@ -2514,7 +2514,7 @@ int main(int argc, char *argv[]) {
         } else {
             int command = buf[0];
             switch(command) {
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
             case 'e':
                 if (!pLcaClient) {
                     pLcaClient = new LocationClientApi(onCapabilitiesCb);
@@ -2594,7 +2594,7 @@ int main(int argc, char *argv[]) {
                     geofenceTestMenu();
                 }
                 break;
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
             case 'u':
                 if (!pLcaClient) {
                     pLcaClient = new LocationClientApi(onCapabilitiesCb);
@@ -2613,7 +2613,7 @@ int main(int argc, char *argv[]) {
                     pLcaClient = NULL;
                 }
                 break;
-#ifndef LOC_QCLINUX_TARGET
+#ifdef LOC_ENABLE_EXTENDED_TEST_COMMANDS
             case 'm':
                 if (!pLcaClient) {
                     pLcaClient = new LocationClientApi(onCapabilitiesCb);
