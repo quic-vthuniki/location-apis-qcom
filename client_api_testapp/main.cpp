@@ -40,8 +40,6 @@
 #include <sstream>
 #include <grp.h>
 #include <sys/types.h>
-#include <sys/prctl.h>
-#include <sys/capability.h>
 #include <semaphore.h>
 #include <getopt.h>
 #include <loc_pla.h>
@@ -666,73 +664,46 @@ static void printHelp() {
     printf("%s: remove geofences with indexes\n", REMOVE_GEOFENCES );
 }
 
-void setRequiredPermToRunAsLocClient() {
+void checkLocClientGroupPermission() {
 #ifdef USE_GLIB
-    struct passwd *locClntPw = getpwnam("locclient");
+    struct passwd *currentUser = getpwuid(geteuid());
+    struct group *currentGroup = getgrgid(getegid());
+    printf("Test app credentials: user=%s (uid=%u), group=%s (gid=%u)\n",
+            currentUser ? currentUser->pw_name : "unknown",
+            static_cast<unsigned int>(geteuid()),
+            currentGroup ? currentGroup->gr_name : "unknown",
+            static_cast<unsigned int>(getegid()));
+
     struct group *locClntGr = getgrnam("locclient");
-    if (NULL == locClntPw || NULL == locClntGr) {
-        printf("NULL pointer encountered LOC_CLIENT UID or GID ...!");
-        exit(0);
+    if (nullptr == locClntGr) {
+        printf("ERROR: locclient group is not available\n");
+        exit(EXIT_FAILURE);
     }
-    if (0 == getuid()) {
-        char groupNames[LOC_MAX_PARAM_NAME] = "diag locclient";
-        printf("group ids: diag locclient\n");
-
-        gid_t groupIds[LOC_PROCESS_MAX_NUM_GROUPS] = {};
-        char *splitGrpString[LOC_PROCESS_MAX_NUM_GROUPS];
-        int numGrps = loc_util_split_string(groupNames, splitGrpString,
-                LOC_PROCESS_MAX_NUM_GROUPS, ' ');
-
-        int numGrpIds=0;
-        for (int i = 0; i < numGrps; i++) {
-            struct group* grp = getgrnam(splitGrpString[i]);
-            if (grp) {
-                groupIds[numGrpIds] = grp->gr_gid;
-                printf("Group %s = %d\n", splitGrpString[i], groupIds[numGrpIds]);
-                numGrpIds++;
-            }
-        }
-        if (0 != numGrpIds) {
-            if (-1 == setgroups(numGrpIds, groupIds)) {
-                printf("Error: setgroups failed %s", strerror(errno));
-            }
-        }
-        // Set the group id first and then set the effective userid, to locclient.
-        if (-1 == setgid(locClntGr->gr_gid)) {
-            printf("Error: setgid failed. %s", strerror(errno));
-        }
-        // Set user id to locclient
-        if (-1 == setuid(locClntPw->pw_uid)) {
-            printf("Error: setuid failed. %s", strerror(errno));
-        }
-
-        // Set capabilities
-        struct __user_cap_header_struct cap_hdr = {};
-        cap_hdr.version = _LINUX_CAPABILITY_VERSION;
-        cap_hdr.pid = getpid();
-        if (prctl(PR_SET_KEEPCAPS, 1) < 0) {
-            printf("Error: prctl failed. %s", strerror(errno));
-        }
-
-        // Set access to CAP_NET_BIND_SERVICE
-        struct __user_cap_data_struct cap_data = {};
-        cap_data.permitted = (1 << CAP_NET_BIND_SERVICE);
-        cap_data.effective = cap_data.permitted;
-        printf("cap_data.permitted: %d", (int)cap_data.permitted);
-        if (capset(&cap_hdr, &cap_data)) {
-            printf("Error: capset failed. %s", strerror(errno));
-        }
-    } else {
-        int userId = getuid();
-        if (locClntPw->pw_uid == userId) {
-            printf("Test app started as locclient user: %d\n", userId);
-        } else {
-            printf("ERROR! Test app started as user: %d\n", userId);
-            printf("Start the test app from shell running as root OR\n");
-            printf("Start the test app as locclient user from shell\n");
-            exit(0);
-        }
+    if (getegid() == locClntGr->gr_gid) {
+        printf("Test app started with locclient primary group: %d\n", getegid());
+        return;
     }
+
+    int numGroups = getgroups(0, nullptr);
+    if (-1 == numGroups) {
+        printf("ERROR: getgroups failed: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    vector<gid_t> groups(numGroups);
+    if (numGroups > 0 && -1 == getgroups(numGroups, groups.data())) {
+        printf("ERROR: getgroups failed: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    if (std::find(groups.begin(), groups.end(), locClntGr->gr_gid) != groups.end()) {
+        printf("Test app started with locclient supplementary group: %d\n",
+                locClntGr->gr_gid);
+        return;
+    }
+
+    printf("ERROR: test app requires locclient group permission\n");
+    exit(EXIT_FAILURE);
 #endif// USE_GLIB
 }
 
@@ -2066,7 +2037,7 @@ Main function
 ******************************************************************************/
 int main(int argc, char *argv[]) {
 
-    setRequiredPermToRunAsLocClient();
+    checkLocClientGroupPermission();
     checkForAutoStart(argc, argv);
 
     // create Location client API
